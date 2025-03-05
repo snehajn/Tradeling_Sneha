@@ -42,59 +42,43 @@ import io.appium.java_client.android.Activity;
 
 public class Tradeling_Waterbottle extends AndroidBaseTest {
 
+	
+
 	@Test
+	public void ValidateWaterOption() throws InterruptedException {
+	    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
-	public void ValidateWaterOption() throws InterruptedException
+	   
 
-	{
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		try {
 
-			AndroidActions w = new AndroidActions(driver);
+	  //  try {
+	        AndroidActions w = new AndroidActions(driver);
+	        wait.until(ExpectedConditions.visibilityOf(registerPage.languagetext));
+	        registerPage.selectLanguage();
 
-			registerPage.selectLanguage();
+	       // wait.until(ExpectedConditions.visibilityOf(registerPage.loginPagetitle));
+	        Assert.assertTrue(registerPage.loginPagetitle.isDisplayed());
+	        System.out.println("Assertion passed: Element is visible.");
+	        
+	        registerPage.gotoregister();
+	        registerPage.Register();
+	        AndroidActions.clickElement(registerPage.continueasGuestBtn);
+	        Thread.sleep(3000);
 
-			try {
-				wait.until(ExpectedConditions.visibilityOf(registerPage.loginPagetitle));
-				AssertJUnit.assertTrue(registerPage.loginPagetitle.isDisplayed());
-				System.out.println(registerPage.loginPagetitle + "Assertion passed: Element is visible.");
-			} catch (TimeoutException e) {
-				Assert.fail("Element did not appear within the timeout.");
-			}
-
-			AssertJUnit.assertTrue(registerPage.loginPagetitle.isDisplayed());
-			
-			//register the user 
-			registerPage.gotoregister();
-			registerPage.Register();
-
-			registerPage.continueasGuestBtn.click();
-
-			// home page
-			Thread.sleep(3000);
-
+	        Assert.assertTrue(homePage.delivertotext.isDisplayed());
+	        homePage.locationpermission();
+	        homePage.clickExpress();
+	        homePage.Wateroption();
+	        
+	        System.out.println("Waiting for popup to be handled...");
+	        latch.await();
+	        System.out.println("Popup handled. Continuing with the test...");
 			/*
-			 * while (!w.isDisplayed(homePage.delivertotext)) { Thread.sleep(3000);
-			 * System.out.println("Element is not visible yet"); }
-			 */
-			AssertJUnit.assertTrue(homePage.delivertotext.isDisplayed());
-			
-			//Grant location access
-			homePage.locationpermission();
-			
-			homePage.clickExpress();
-			
-			homePage.Wateroption();
-			
+			 * } catch (TimeoutException e) {
+			 * Assert.fail("Element did not appear within the timeout."); return; } catch
+			 * (NoSuchElementException e) { System.out.println("Element not found: " +
+			 * e.getMessage()); } catch (InterruptedException e) {
+			 * System.out.println("Thread was interrupted: " + e.getMessage()); }
+			 */	}
 
-		} catch (NoSuchElementException e) {
-			System.out.println("Element not found: " + e.getMessage());
-		} catch (InterruptedException e) {
-			System.out.println("Thread was interrupted: " + e.getMessage());
-			/*
-			 * catch (Exception e) { System.out.println("Unexpected error: " +
-			 * e.getMessage());
-			 */
-		}
-	}
 }

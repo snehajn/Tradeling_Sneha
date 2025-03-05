@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
 
 import com.google.common.collect.ImmutableMap;
@@ -46,7 +47,7 @@ public class RegisterPage extends AndroidActions{
 	 */
 	public String framepopup="//android.widget.FrameLayout";
 	
-	public String backbutton="////android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.view.View/android.view.View/android.view.View/android.view.View[1]/android.view.View/android.widget.ImageView[1]";
+	public String backbutton="//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.view.View/android.view.View/android.view.View/android.view.View[1]/android.view.View/android.widget.ImageView[1]";
 	
 	@AndroidFindBy(xpath="//android.widget.Button[@text='Close']")
 	public WebElement framepopupclose;
@@ -103,14 +104,15 @@ public class RegisterPage extends AndroidActions{
 	public void selectLanguage()
 	{
 		
+		try {
 		if(languagetext.isDisplayed()) {
 		Assert.assertTrue(languagetext.isDisplayed(), "English language is selected");
 		continuebtn.click();
 		}
-		else {
-			langEnglish.click();
-			continuebtn.click();
-		}
+	} catch (Exception e) {
+        System.out.println("Failed to click element: " + continuebtn + " due to: " + e.getMessage());
+    }
+		
 	}
 	
 	public void gotoregister()
@@ -118,7 +120,7 @@ public class RegisterPage extends AndroidActions{
 
 		Assert.assertTrue(Tradelinglogo.isDisplayed(), "Login page is displayed");
 		
-		startregisterClick.click();
+		AndroidActions.clickElement(startregisterClick);
 		
 		Assert.assertTrue(registertTitle.isDisplayed(), "Register page is displayed");
 		
@@ -127,17 +129,17 @@ public class RegisterPage extends AndroidActions{
 	public void Register()
 	{
 
-		inputEmailPh.click();
+		AndroidActions.clickElement(inputEmailPh);
 		inputEmailPh.sendKeys("058586281");
 		continueBtn.click();
 		
 		Assert.assertTrue(inputEmailPhValerror.isDisplayed(), "Validationerror is displayed");
-		inputEmailPh.click();
+		AndroidActions.clickElement(inputEmailPh);
 		inputEmailPh.clear();
 		//enter the mobile number
 		inputEmailPh.sendKeys("585862813");
 		
-		continueBtn.click();
+		AndroidActions.clickElement(continueBtn);
 		
 		
 	}

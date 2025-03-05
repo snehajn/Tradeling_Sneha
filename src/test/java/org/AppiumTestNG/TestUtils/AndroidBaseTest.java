@@ -1,7 +1,8 @@
 package org.AppiumTestNG.TestUtils;
 
 import org.testng.annotations.AfterMethod;
-import org.AppiumTestNG.utils.PopupHandler;
+import org.AppiumTestNG.utils.AndroidActions;
+import org.AppiumTestNG.utils.AppiumUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -20,6 +21,7 @@ import java.time.Duration;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,6 +29,7 @@ import org.AppiumTestNG.pageObjects.android.HomePage;
 import org.AppiumTestNG.pageObjects.android.RegisterPage;
 import org.AppiumTestNG.utils.AppiumUtils;
 import org.aspectj.lang.annotation.Before;
+import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -43,28 +46,22 @@ import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import io.appium.java_client.service.local.AppiumServiceBuilder;
 
-public class AndroidBaseTest extends AppiumUtils {
+public class AndroidBaseTest extends AppiumUtils{
 
 	public AndroidDriver driver;
 	public AppiumDriverLocalService service;
 	public RegisterPage registerPage;
 	public HomePage homePage;
-	private static PopupHandler popupHandler;
+	public AndroidActions androidactions;
+	private ExecutorService executorService;
+    public CountDownLatch latch;
+    
+	
+	
 
 	@BeforeClass(alwaysRun = true)
 	public void ConfigureAppium() throws IOException {
-		Properties prop = new Properties();
-		FileInputStream fis = new FileInputStream(System.getProperty("user.dir")
-				+ "//src//main//java//org//rahulshettyacademy//resources//data.properties");
-		prop.load(fis);
-		String ipAddress = System.getProperty("ipAddress") != null ? System.getProperty("ipAddress")
-				: prop.getProperty("ipAddress");
-		System.out.println(ipAddress);
-
-		// String ipAddress = prop.getProperty("ipAddress");
-		String port = prop.getProperty("port");
-
-		// service = startAppiumServer(ipAddress,Integer.parseInt(port));
+		
 		try {
 			DesiredCapabilities capabilities = new DesiredCapabilities();
 			capabilities.setCapability("platformName", "Android");
@@ -80,26 +77,72 @@ public class AndroidBaseTest extends AppiumUtils {
 			
 
 			driver = new AndroidDriver(new URL("http://localhost:4723/wd/hub"), capabilities);
+			executorService = Executors.newSingleThreadExecutor();
+			executorService.submit(this::handleMarketingPopup);
+			latch = new CountDownLatch(1);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(20));
 		// driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
 
 		registerPage = new RegisterPage(driver);
 		homePage = new HomePage(driver);
+		androidactions= new AndroidActions(driver);
+		
+		
+		
 		//POPUP handler running for every test
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-		PopupHandler popupHandler = new PopupHandler(driver, registerPage.framepopup, registerPage.backbutton);
-		executor.submit(popupHandler);
+		
+		  		
+		
+		
+	
 
 	}
+	 
+
+	    private void handleMarketingPopup() {
+	        try {
+	            while (true) {
+	                // Check for the marketing popup
+	            	 if (driver.findElements(By.xpath("//android.widget.FrameLayout[@displayed='false']")).size() > 0) {
+		                	WebElement popup = driver.findElement(By.xpath("//android.widget.FrameLayout[@displayed='false']"));
+		                    popup.click();
+		                    System.out.println("Popup detected and closed");
+		                    WebElement backbuttonele = driver.findElement(By.className("android.widget.ImageView"));
+		                    System.out.println(backbuttonele);
+		                    AndroidActions.clickElement(backbuttonele);  
+		                    System.out.println("back button clicked");
+	                    
+	                    // Pause the main thread for a moment
+	                    //TimeUnit.SECONDS.sleep(2);
+	                    
+	                    // Count down the latch to let the main thread proceed
+	                    latch.countDown();
+	                    break;
+	                }
+	                // Check for popup every second
+	                TimeUnit.SECONDS.sleep(1);
+	            }
+	            
+	        }catch (InterruptedException e) {
+	            Thread.currentThread().interrupt();
+	        }
+	    }
+	    
+
 
 	@AfterClass(alwaysRun = true)
 	public void tearDown() {
 		
-		popupHandler.stopPopupHandler();
+		
+		
+		
+		if (executorService != null) {
+            executorService.shutdownNow();
+        }
 		driver.quit();
 		// service.stop();
 	}

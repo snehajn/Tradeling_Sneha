@@ -6,6 +6,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -27,31 +28,32 @@ public class PopupHandler implements Runnable{
     private String popupLocator;
     private String backbutton;
     private volatile boolean stopThread = false;
+    private volatile boolean isHandlingPopup = false; 
 
-    public PopupHandler (AndroidDriver driver, String popupLocator, String backbutton) {
+    public PopupHandler (AndroidDriver driver) {
         this.driver = driver;
-        this.popupLocator = popupLocator;
-        this.backbutton =backbutton;
-       
+      
     }
     
     @Override
     public void run() {
-        while (!stopThread) {
+    	while (!stopThread) {
             try {
-                //WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10)); // Short wait to check frequently
-                //WebElement popupElement = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(popupLocator)));
-            	WebElement popupElement = driver.findElement(By.xpath("//android.widget.FrameLayout"));
+                if (true) {
+                    isHandlingPopup = true; // Notify main thread
+                    System.out.println("Popup detected. Closing it...");
+
+                   	WebElement popupElement = driver.findElement(By.xpath("//android.widget.FrameLayout"));
             	WebElement backbuttonele = driver.findElement(By.xpath(backbutton));
-            	
-                if (popupElement.isDisplayed()) {
-                	  // Explicit cast
-                    System.out.println("Popup detected. Closing it.");
+
                     popupElement.click();
                     backbuttonele.click();
+                    
+                    System.out.println("Popup closed.");
+                    isHandlingPopup = false; // Reset flag
                 }
-            } catch ( NoSuchElementException e) {
-                // No popup found, continue execution
+            } catch (NoSuchElementException | StaleElementReferenceException e) {
+                isHandlingPopup = false; // No popup found
             }
 
             try {
@@ -62,7 +64,12 @@ public class PopupHandler implements Runnable{
             }
         }
     }
-    public void stopPopupHandler() {
+
+    public void stop() {
         stopThread = true;
+    }
+
+    public boolean isPopupBeingHandled() {
+        return isHandlingPopup;
     }
 }

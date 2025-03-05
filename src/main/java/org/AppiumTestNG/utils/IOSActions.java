@@ -19,7 +19,7 @@ public class IOSActions extends AppiumUtils{
 	
 	public IOSActions(IOSDriver driver)
 	{
-	
+		
 		this.driver = driver;
 	}
 	

@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -26,6 +27,9 @@ import io.appium.java_client.service.local.AppiumServiceBuilder;
 public abstract class AppiumUtils {
 
 	public AppiumDriverLocalService service;
+	private WebDriver driver;
+	 
+	    
 
 	
 	public Double getFormattedAmount(String amount)
@@ -86,6 +90,7 @@ public abstract class AppiumUtils {
 		
 		
 	}
+
 	
 	
 }

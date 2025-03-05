@@ -24,11 +24,16 @@ import java.util.function.Function;
 public class AndroidActions extends AppiumUtils{
 	
 	AndroidDriver driver;
+	private static WebDriverWait wait;
+	private static final Duration DEFAULT_TIMEOUT =  Duration.ofSeconds(10); ;
+
 	
 	public AndroidActions(AndroidDriver driver)
 	{
-	
+		
 		this.driver = driver;
+		this.wait = new WebDriverWait(driver, DEFAULT_TIMEOUT);
+		
 	}
 	
 	public void longPressAction(WebElement ele)
@@ -47,6 +52,10 @@ public class AndroidActions extends AppiumUtils{
 	 * } else{ !driver.findElement(By.id("!buttonID")).click(); Thread.sleep(1000);
 	 * }
 	 */
+	 public static void clickElement(WebElement element) {
+	        wait.until(ExpectedConditions.elementToBeClickable(element));
+	        element.click();
+	    }
 	
 	
 
